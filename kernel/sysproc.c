@@ -95,3 +95,15 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_trace(void)
+{
+  // 一个process可以有多个syscall调用，trace所做的是把trace的参数存到当前process的proc结构体中
+  // 供之后的syscall比较使用。之后的系统调用结束后再去看调用号与mask是否匹配
+  int mask; 
+  if(argint(0, &mask) < 0)
+    return -1;
+  myproc()->mask = mask;
+  return 0;
+}
