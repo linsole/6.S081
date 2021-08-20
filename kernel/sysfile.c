@@ -504,3 +504,17 @@ sys_sysinfo(void)
     return -1;
   return 0;
 }
+
+uint64
+sys_mysyscall(void)
+{
+  uint64 pointer;
+  if(argaddr(0, &pointer) < 0) // 保存系统调用的参数
+    return -1;
+  char temp[20];
+  struct proc *p = myproc();
+  if(copyin(p->pagetable, temp, pointer, 14) < 0)
+    return -1;
+  printf(temp);
+  return 0;
+}
