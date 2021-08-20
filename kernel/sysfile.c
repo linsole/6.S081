@@ -15,6 +15,10 @@
 #include "sleeplock.h"
 #include "file.h"
 #include "fcntl.h"
+#include "sysinfo.h"
+
+extern void setfreemem(struct sysinfo*);
+extern void setnproc(struct sysinfo*);
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -482,5 +486,21 @@ sys_pipe(void)
     fileclose(wf);
     return -1;
   }
+  return 0;
+}
+
+uint64
+sys_sysinfo(void)
+{
+  uint64 si;
+    if(argaddr(0, &si) < 0) // 保存系统调用的参数
+    return -1;
+
+  struct sysinfo ksi; // 在内核内声明一个变量，设置好值然后用copyout传出去
+  setfreemem(&ksi);
+  setnproc(&ksi);
+  struct proc *p = myproc();
+  if(copyout(p->pagetable, si, (char *)&ksi, sizeof(ksi)) < 0)
+    return -1;
   return 0;
 }
